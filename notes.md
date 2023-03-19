@@ -37,3 +37,14 @@ These properties will be compile into **matrices**(singular: **matrix**). The ma
 - `Quaternion` also expresses a rotation, but in a more mathematical way. Remember: `quaternion` updates when you change the `rotation`.
 - `Object3D` instances have a `lookAt()` method which rotates the object so that its `-z` faces the target you provided. The target must be a `Vector3`.
 - scene graph: you can put objects inside groups and use `position`, `rotation` and `scale` to transform the group. To do that, use the `Group` class.
+
+## 4. Animations
+
+The purpose of `requestAnimationFrame()` is to call the function provided on the **next** frame. It's not doing animation. Basically, when you pass a callback function to `requestAnimationFrame()`, the browser will call that function approximately 60 times per second.
+
+- The advantages of `requestAnimationFrame()` over `setInterval()` and `setTimeout()` are:
+  - It's synchronized with the browser's repaint cycle, which means that the animation is updated only when the browser is ready to repaint the screen. This allows the animation to be updated at the optimal time, resulting in a smoother and more efficient animation. However, `setTimeout()` and `setInterval()` are not synchronized with the browser's repaint cycle, which can result in janky or stuttering animations. For example, let's say you use setInterval() to update the position of an element every 10 milliseconds. If the browser is able to repaint the screen faster than every 10 milliseconds, the animation may appear janky or stuttering because it's updating at a fixed interval, regardless of whether the browser has finished rendering the previous frame.
+  -  It pauses when the user navigates to another browser tab, hence not wasting their precious processing power and battery life.
+
+- Don't use `getDelta()` , use `getElapsedTime()` instead.
+- *GSAP* is a JavaScript animation library for creating high-performance animations that work in every major browser. It's a great alternative to `requestAnimationFrame()`.
