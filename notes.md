@@ -48,3 +48,25 @@ The purpose of `requestAnimationFrame()` is to call the function provided on the
 
 - Don't use `getDelta()` , use `getElapsedTime()` instead.
 - *GSAP* is a JavaScript animation library for creating high-performance animations that work in every major browser. It's a great alternative to `requestAnimationFrame()`.
+
+## 5. Cameras
+
+**PerspectiveCamera(透视相机)** is like the human eye, the closer object appears larger, and vice versa. It's used in photography, film and 3d video games.
+**OrthographicCamera(正交相机)** is like a camera with a fixed lens, the object appears the same size regardless of how far it is from the camera. It's used in architecture, engineering and 2d video games(object sizes must be consistent).
+
+- Don't use extreme values like 0.0001 or 99999 for the near and far clipping plane. It will cause z-fighting (glitching).
+- Math.sin() starts at 0, Math.cos() starts at 1. Math.PI is half a circle, Math.PI * 2 is a full circle.
+
+![alt](./images/sin-x.png)
+![alt](./images/cos-x.png)
+
+**Controls**:
+- `OrbitControls` is like a camera orbiting around a target. Except it doesn't goes under the plane.
+- `TrackballControls` is like `OrbitControls`, but it goes under the plane.
+- `FlyControls` and `FirstPersonControls` are alike, but `FlyControls` is more like a plane, it can roll over.
+- `PointerLockControls` is like minecraft, you can move and jump,
+- `ArcballControls` is like examining a prop in a game, like purchasing a gun in Counter-Strike.
+- `DragControls` can drag objects. It has nothing to do with the camera.
+- `TransformControls` can move, rotate and scale objects.
+
+For `OrbitControls`, The damping will smooth the animation by adding some kind of acceleration and friction. It's like real-life motion, with inertia.
