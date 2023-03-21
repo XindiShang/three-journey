@@ -70,3 +70,23 @@ The purpose of `requestAnimationFrame()` is to call the function provided on the
 - `TransformControls` can move, rotate and scale objects.
 
 For `OrbitControls`, The damping will smooth the animation by adding some kind of acceleration and friction. It's like real-life motion, with inertia.
+
+
+## 6. Resizing & Fullscreen
+
+1. `camera.updateProjectionMatrix()` updates the camera's projection matrix in Three.js, which is used to calculate how 3D objects are projected onto a 2D screen or window. This method needs to be called whenever the *camera's properties* or *canvas size* change to ensure the scene is rendered correctly. If you have multiple cameras in your Three.js application, you may need to manually call this method for each camera. However, if you only have one camera, Three.js will automatically update its projection matrix in each frame.
+
+2. `pixelRatio`：
+- History: few years ago, all screens had a pixel ratio of 1. Constructors like Apple started building screens with a pixel ratio of 2. Now, there are even higher pixel ratios like 3.
+- A pixel ratio of 2 means 4 times more pixels than a pixel ratio of 1. A pixel ratio of 3 means 9 times more pixels than a pixel ratio of 1. Highest pixel ratios are usually on the weakest devices - mobiles.
+
+![alt](./images/pixel-ratio.png)
+- Why update pixel ratio when resizing window?
+  - When you resize the window, you are actually changing the size and resolution of the visible area of the window, even on the same monitor. This may cause the pixel ratio to be incorrect, which can result in a loss of rendering quality and clarity. Therefore, it is necessary to update the pixel ratio to ensure that the rendered image always has the correct clarity and quality, even when resizing the window on the same monitor. In Three.js, the pixel ratio needs to be updated every time the window is resized.
+
+3. **FullScreen**:
+- `document.fullscreenElement` returns the element that is currently displayed in full screen mode. If there is no element in full screen mode, it returns `null`.
+- `document.exitFullscreen()` exits full screen mode. 
+- `canvas.requestFullscreen()` requests full screen mode for the canvas element.
+  
+*Note*: `document.fullscreenElement` is not supported by IE and Safari. Instead, use `document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement`.
