@@ -115,3 +115,7 @@ For `OrbitControls`, The damping will smooth the animation by adding some kind o
 - All geometry generators (like `THREE.BoxGeometry`) produce `THREE.BufferGeometry` now
 - To create buffer geometry, we need to use `Float32Array` instead of `Array` to store the data. It's a typed array that can only store a fixed length of 32-bit floating point numbers. It's easier for computers to process `Float32Array`.
 - *Shared vertices* are vertices that are shared by multiple faces. To avoid this, you can use `geometry.setIndex()` to specify the order in which the vertices should be drawn.
+
+## 8. Debug GUI
+1. **dat.GUI**
+- Types of elements (tweaks): `Range`, `Color`, `Text`, `Checkbox`, `Button`, `Select`, `Folder`...
