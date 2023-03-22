@@ -90,3 +90,28 @@ For `OrbitControls`, The damping will smooth the animation by adding some kind o
 - `canvas.requestFullscreen()` requests full screen mode for the canvas element.
   
 *Note*: `document.fullscreenElement` is not supported by IE and Safari. Instead, use `document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement`.
+
+## 7. Geometries
+1. Geometry Basics:
+- Composed of vertices(point coordinates), faces(triangles that join those vertices to create a surface).
+- Can be used for meshes but also for particles.
+- Can store more data than positions (UV coordinates, normals, colors, etc).
+
+2. Parameters
+- `width`: The size on the `x` axis
+- `height`: The size on the `y` axis
+- `depth`: The size on the `z` axis
+- `widthSegments`: How many subdivisions in the `x` axis
+- `heightSegments`: How many subdivisions in the `y` axis
+- `depthSegments`: How many subdivisions in the `z` axis
+
+- Subdivisions correspond to how much triangles should compose a face
+  - `1` = 2 triangles per face
+  - `2` = 8 triangles per face
+- The more subdivisions, the detailed the geometry will be. Because you can manipulate the vertices and triangles, you can create a lot of different shapes.
+
+3. BufferGeometry (more efficient than Geometry)
+- `THREE.Geometry` is no longer renderable and can’t be used to create 3D objects (meshes, lines, points) anymore.
+- All geometry generators (like `THREE.BoxGeometry`) produce `THREE.BufferGeometry` now
+- To create buffer geometry, we need to use `Float32Array` instead of `Array` to store the data. It's a typed array that can only store a fixed length of 32-bit floating point numbers. It's easier for computers to process `Float32Array`.
+- *Shared vertices* are vertices that are shared by multiple faces. To avoid this, you can use `geometry.setIndex()` to specify the order in which the vertices should be drawn.
