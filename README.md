@@ -117,5 +117,32 @@ For `OrbitControls`, The damping will smooth the animation by adding some kind o
 - *Shared vertices* are vertices that are shared by multiple faces. To avoid this, you can use `geometry.setIndex()` to specify the order in which the vertices should be drawn.
 
 ## 8. Debug GUI
-1. **dat.GUI**
+**dat.GUI** [Demo](https://jsfiddle.net/ikatyang/182ztwao/)
 - Types of elements (tweaks): `Range`, `Color`, `Text`, `Checkbox`, `Button`, `Select`, `Folder`...
+- Use `gui.add(object, key)` to add a tweak.
+- To change **color**, use `gui.addColor(object, key)` instead, and chain `.onChange()` to it.
+
+```javascript
+const parameters = {
+    color: 0xc18dd4,
+    spin: () => { 
+        gsap.to(mesh.rotation, { duration: 1, y: mesh.rotation.y + 10 })
+    }
+}
+
+gui
+    .addColor(parameters, 'color')
+    .onChange(() => {
+        material.color.set(parameters.color)
+    })
+
+gui
+    .add(parameters, 'spin')
+
+gui
+    .add(mesh.position, 'y')
+    .min(-3)
+    .max(3)
+    .step(0.01)
+    .name('elevation')
+```
