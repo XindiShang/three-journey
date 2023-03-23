@@ -146,3 +146,20 @@ gui
     .step(0.01)
     .name('elevation')
 ```
+
+## 9. Textures
+1. **UV Coordinates**:
+- UV coordinates are 2D, like the result of unwrapping a 3D object, such as a candy bar or a box. Each vertex of the 3D object has a corresponding UV coordinate.
+- Use `geometry.attributes.uv` to access the UV coordinates of the vertices.
+- `repeat` is the number of times the texture is repeated in each direction. `wrapS` and `wrapT` are the wrapping modes for the texture in the `x` and `y` directions. `repeatWrapping` is used to repeat the texture in both directions. `mirroredRepeatWrapping` is similar to `repeatWrapping`, but the texture is mirrored in each direction.
+- A `Vector2` ranges from 0 to 1. If you want to center the pivot, you can use `0.5` as the `x` and `y` values.
+
+2. **MipMaps**:
+- Mipmaps (also known as pyramid textures) are a texture mapping technique used to improve performance and image quality when **viewing textures at different distances and angles**. In a mipmap texture, the original texture is processed to generate a series of images of *decreasing size*, forming a pyramid structure. These images are stored together, so that smaller textures are used when viewing at greater distances or angles, improving rendering efficiency and reducing texture distortion.
+- We can change the minification filter of texture with `minFilter` and `maxFilter`, the value can be `THREE.NearestFilter`, which is precise and gives a sharp feeling.
+- When setting `NearestFilter` as the minification filter, we don't need mipmaps. We can deactivate it with `texture.generateMipmaps = false`.
+
+3. **Considerations**:
+- Weight: each pixel of texture will be stored in GPU regardless of the image's weight. GPU has storage limitations, so it's even worse because mipmapping increases the number of pixels. Try to reduce the size of image as much as possible.
+- Size: size (width and height) must be a power of 2.
+- Data
