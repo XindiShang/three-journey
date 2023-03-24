@@ -163,3 +163,14 @@ gui
 - Weight: each pixel of texture will be stored in GPU regardless of the image's weight. GPU has storage limitations, so it's even worse because mipmapping increases the number of pixels. Try to reduce the size of image as much as possible.
 - Size: size (width and height) must be a power of 2.
 - Data
+
+## 10. Materials
+- **Materials** are used to put a color on each visible pixel of the geometry. The algorithm that determines the color of each pixel is called a **shader**.
+- `MeshBasicMaterial` is the simplest material. It doesn't react to light and doesn't have any texture. It's used for debugging.
+- `MeshNormalMaterial` is used to show lighting, reflections, and shadows. It's usually used to debug normals, but the color looks great too. [Cool Demo](https://www.ilithya.rocks/)
+- `MeshMatcapMaterial` gives an illusion that objects are being illuminated.
+- `MeshDepthMaterial` will simply color the geometry in white if it's close to the `near` and in black if it's close to the `far` value of the camera.
+- `MeshLambertMaterial` is a material that reacts to light and is used to simulate some surfaces (such as untreated wood or stone), but not shiny surfaces (such as varnished wood). It's performant, but it's not physically accurate.
+- `MeshPhongMaterial` is similar to `MeshLambertMaterial`, but it can simulate shiny surfaces.
+- `MeshToonMaterial` is a cartoon-like material. When the gradient is too small, the `magFilter` will fix it with `mipmapping`. We can set `minFilter` and `magFilter` to `THREE.NearestFilter` to fix it. We can also deactivate `mipmapping` with `texture.generateMipmaps = false`.
+- `MeshStandardMaterial` is a physically accurate material. It reacts to light and shadows, and it supports `roughness` and `metalness`.
