@@ -174,6 +174,25 @@ gui
 - `MeshPhongMaterial` is similar to `MeshLambertMaterial`, but it can simulate shiny surfaces.
 - `MeshToonMaterial` is a cartoon-like material. When the gradient is too small, the `magFilter` will fix it with `mipmapping`. We can set `minFilter` and `magFilter` to `THREE.NearestFilter` to fix it. We can also deactivate `mipmapping` with `texture.generateMipmaps = false`.
 - `MeshStandardMaterial` is a physically accurate material. It reacts to light and shadows, and it supports `roughness` and `metalness`. Since `PBR` is gradually being adopted as the *STANDARD* of rendering realistic material, it's probably why it's called `MeshStandardMaterial`.
+- `meshPhysicalMaterial` is the same as `MeshStandardMaterial` but with support of a clear coat layer. It's like a glass material that can reflect the environment.
+- `shaderMaterial` and `RawShaderMaterial` can both be used to customize materials.
 
-2. **Maps**:
-- `aoMap` (Ambient Occlusion Map) will add shadows to where the texture is dark. We must add a second set of UV named `uv2` to the geometry. The name `uv2` is mandated by Three.js. We can use `geometry.setAttribute('uv2', new THREE.BufferAttribute(geometry.attributes.uv.array, 2))` to add it.
+1. **Maps**:
+- `aoMap` (Ambient Occlusion Map) will add shadows to where the texture is dark. We must add a second set of UV named `uv2` to the geometry. The name `uv2` is mandated by Three.js. We can use `geometry.setAttribute('uv2', new THREE.BufferAttribute(geometry.attributes.uv.array, 2))` to add it. After that, we can update the material with `material.aoMap = texture` and `material.aoMapIntensity = 5`.
+- `displacementMap` will show the ups and downs of the texture. We can use `material.displacementScale = 0.1` to control the intensity. For the height map texture, if the color is white, it will be elevated, and if it's black, it will be depressed. Don't forget to adjust the subdivisions of the geometry to provide enough vertices to show the details.
+- `metalnessMap` and `roughnessMap` will add more details to the material. But we shouldn't mix `metalness` and `roughness` maps with `metalness` and `roughness` values. If we do, the result will look weird.
+- `normalMap` will fake the normals orientation and details on the surface regardless of the subdivision. And we can use `material.normalScale` (a Vector2) to control the intensity.
+- `alphaMap` will make the texture transparent. We can use `material.transparent = true` to make it work.
+- `enviromentMap` is an image of what's surrounding the scene. It can be used for reflections and refractions but also for general lighting. Environment maps are supported by multiple materials. [HDRI Haven](https://hdrihaven.com/) is a great place to find free environment maps. But HDR file needs to be divided, use [this tool](https://matheowis.github.io/HDRI-to-CubeMap/), note that the converted images are png by default.
+```javascript
+const cubeTextureLoader = new THREE.CubeTextureLoader()
+// provide 6 directions
+const environmentMapTexture = cubeTextureLoader.load([
+    '/textures/environmentMaps/0/px.jpg', // right
+    '/textures/environmentMaps/0/nx.jpg', // left
+    '/textures/environmentMaps/0/py.jpg', // top
+    '/textures/environmentMaps/0/ny.jpg', // bottom
+    '/textures/environmentMaps/0/pz.jpg', // front
+    '/textures/environmentMaps/0/nz.jpg', // back
+])
+```
