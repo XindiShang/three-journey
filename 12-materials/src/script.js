@@ -83,6 +83,7 @@ const scene = new THREE.Scene()
 const material = new THREE.MeshStandardMaterial()
 material.metalness = 0.45
 material.roughness = 0.65
+material.map = doorColorTexture
 
 gui.add(material, 'metalness').min(0).max(1).step(0.0001)
 gui.add(material, 'roughness').min(0).max(1).step(0.0001)
@@ -97,6 +98,8 @@ const plane = new THREE.Mesh(
     new THREE.PlaneGeometry(1, 1),
     material
 )
+console.log(plane.geometry.attributes.uv)
+// plane.geometry.setAttribute('uv2', new THREE.BufferAttribute())
 
 const torus = new THREE.Mesh(
     new THREE.TorusGeometry(0.3, 0.2, 16, 32),

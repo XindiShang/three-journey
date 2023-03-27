@@ -165,7 +165,7 @@ gui
 - Data
 
 ## 10. Materials
-- **Materials** are used to put a color on each visible pixel of the geometry. The algorithm that determines the color of each pixel is called a **shader**.
+1. **Materials** are used to put a color on each visible pixel of the geometry. The algorithm that determines the color of each pixel is called a **shader**.
 - `MeshBasicMaterial` is the simplest material. It doesn't react to light and doesn't have any texture. It's used for debugging.
 - `MeshNormalMaterial` is used to show lighting, reflections, and shadows. It's usually used to debug normals, but the color looks great too. [Cool Demo](https://www.ilithya.rocks/)
 - `MeshMatcapMaterial` gives an illusion that objects are being illuminated.
@@ -173,4 +173,7 @@ gui
 - `MeshLambertMaterial` is a material that reacts to light and is used to simulate some surfaces (such as untreated wood or stone), but not shiny surfaces (such as varnished wood). It's performant, but it's not physically accurate.
 - `MeshPhongMaterial` is similar to `MeshLambertMaterial`, but it can simulate shiny surfaces.
 - `MeshToonMaterial` is a cartoon-like material. When the gradient is too small, the `magFilter` will fix it with `mipmapping`. We can set `minFilter` and `magFilter` to `THREE.NearestFilter` to fix it. We can also deactivate `mipmapping` with `texture.generateMipmaps = false`.
-- `MeshStandardMaterial` is a physically accurate material. It reacts to light and shadows, and it supports `roughness` and `metalness`.
+- `MeshStandardMaterial` is a physically accurate material. It reacts to light and shadows, and it supports `roughness` and `metalness`. Since `PBR` is gradually being adopted as the *STANDARD* of rendering realistic material, it's probably why it's called `MeshStandardMaterial`.
+
+2. **Maps**:
+- `aoMap` (Ambient Occlusion Map) will add shadows to where the texture is dark. We must add a second set of UV named `uv2` to the geometry. The name `uv2` is mandated by Three.js. We can use `geometry.setAttribute('uv2', new THREE.BufferAttribute(geometry.attributes.uv.array, 2))` to add it.
