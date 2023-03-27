@@ -177,7 +177,7 @@ gui
 - `meshPhysicalMaterial` is the same as `MeshStandardMaterial` but with support of a clear coat layer. It's like a glass material that can reflect the environment.
 - `shaderMaterial` and `RawShaderMaterial` can both be used to customize materials.
 
-1. **Maps**:
+2. **Maps**:
 - `aoMap` (Ambient Occlusion Map) will add shadows to where the texture is dark. We must add a second set of UV named `uv2` to the geometry. The name `uv2` is mandated by Three.js. We can use `geometry.setAttribute('uv2', new THREE.BufferAttribute(geometry.attributes.uv.array, 2))` to add it. After that, we can update the material with `material.aoMap = texture` and `material.aoMapIntensity = 5`.
 - `displacementMap` will show the ups and downs of the texture. We can use `material.displacementScale = 0.1` to control the intensity. For the height map texture, if the color is white, it will be elevated, and if it's black, it will be depressed. Don't forget to adjust the subdivisions of the geometry to provide enough vertices to show the details.
 - `metalnessMap` and `roughnessMap` will add more details to the material. But we shouldn't mix `metalness` and `roughness` maps with `metalness` and `roughness` values. If we do, the result will look weird.
