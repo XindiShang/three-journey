@@ -196,3 +196,27 @@ const environmentMapTexture = cubeTextureLoader.load([
     '/textures/environmentMaps/0/nz.jpg', // back
 ])
 ```
+
+## 11. 3D Texts
+- `FontLoader` is used to load fonts. We can use `fontLoader.load('/fonts/helvetiker_regular.typeface.json', font => {})` to load a font. The font is a JSON file, so we can use `JSON.parse(font)` to convert it to a JavaScript object.
+- a **bevel** is a technique to make the edges of a 3D object look more rounded. It's usually used to make 3D text look more realistic. 
+![alt](./images/bevel.png)
+![alt](./images/bevel_segments.png)
+```js
+const fontLoader = new FontLoader();
+fontLoader.load( 'fonts/helvetiker_regular.typeface.json', function ( font ) {
+    const textGeometry = new TextGeometry(
+        'Hello Three.js',
+        {
+            font: font,
+            size: 0.5,
+            height: 0.2,
+            curveSegments: 5, // how smooth the curve is
+            bevelEnabled: true,
+            bevelThickness: 0.03,
+            bevelSize: 0.02,
+            bevelOffset: 0,
+            bevelSegments: 4 // how smooth the bevel is
+        }
+    );
+```
