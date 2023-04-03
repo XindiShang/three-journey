@@ -220,3 +220,7 @@ fontLoader.load( 'fonts/helvetiker_regular.typeface.json', function ( font ) {
         }
     );
 ```
+- a **bounding** can be a box or a sphere, it's the information with the geometry that tells what **space is taken by that geometry**. By default, Three.js uses sphere bounding
+[alt](./images/bounding.png)
+- **Frustum culling** is a technique used in computer graphics to improve performance by *eliminating objects* that are outside of the camera's view frustum, which is the portion of space that is visible in the camera's view. In a 3D scene, a frustum is a pyramid-shaped volume that defines the view of the camera. It's like **a truncated pyramid with the top cut off, and it's positioned so that the camera is at the narrow end of the frustum**. Frustum culling is done by testing each object's bounding volume (e.g. a bounding box or sphere) against the view frustum, and if the object is outside of the frustum, it is culled or not drawn. This can significantly reduce the number of objects that need to be rendered, improving the overall performance of the system.
+- To center the 3D text, there are two ways: one way is to use `textGeometry.computeBoundingBox()` to get the bounding box max, which is the entire width of the text. Then use `textGeometry.translate(-textGeometry.boundingBox.max.x / 2, 0, 0)` to center the text. It's like absolute centering a text in CSS. Another way is to use `textGeometry.center()` to center the text, which is much simpler.
