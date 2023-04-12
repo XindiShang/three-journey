@@ -282,3 +282,16 @@ fontLoader.load( 'fonts/helvetiker_regular.typeface.json', function ( font ) {
 - `PointLightHelper`
 - `SpotLightHelper`
 - `RectAreaLightHelper`: manually imported
+
+## 13. Shadows
+
+#### Types of shadows
+---
+1. **Core Shadows**:
+2. **Drop Shadows**:
+
+#### Rate tracing
+---
+- Shadows have always been a **challenge for real-time** 3D rendering (because you need shadows at a good frame rate), rate tracing (one technique) can take a long time to render, maybe hours to do one render, we can't afford to do that in real-time. Developers must find tricks to display realistic shadows at a reasonable frame rate. Three.js has a built-in solution. It's not perfect, but it's convenient.
+- Before you do one scene-render, Three.js will do a render for each light supporting shadows, these light renders will simulate what the light sees as if it was a camera. During these light renders, a ```MeshDepthMaterial``` replaces all mesh materials.
+- The light renders are stored as textures and we call them **shadow maps**. They are then used on every material supposed to receive shadows and projected on the geometry. [Demo](https://threejs.org/examples/webgl_shadowmap_viewer.html)
