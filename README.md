@@ -160,13 +160,13 @@ gui.add(mesh.position, "y").min(-3).max(3).step(0.01).name("elevation");
 - `repeat` is the number of times the texture is repeated in each direction. `wrapS` and `wrapT` are the wrapping modes for the texture in the `x` and `y` directions. `repeatWrapping` is used to repeat the texture in both directions. `mirroredRepeatWrapping` is similar to `repeatWrapping`, but the texture is mirrored in each direction.
 - A `Vector2` ranges from 0 to 1. If you want to center the pivot, you can use `0.5` as the `x` and `y` values.
 
-2. **MipMaps**:
+2. **MipMaps(纹理贴图)**:
 
-- Mipmaps (also known as pyramid textures) are a texture mapping technique used to improve performance and image quality when **viewing textures at different distances and angles**. In a mipmap texture, the original texture is processed to generate a series of images of _decreasing size_, forming a pyramid structure. These images are stored together, so that smaller textures are used when viewing at greater distances or angles, improving rendering efficiency and reducing texture distortion.
+- Mipmaps (also known as pyramid textures) are a texture mapping technique used to improve performance and image quality when **viewing textures at different distances and angles**. In a mipmap texture, the original texture is processed to generate a series of images of _decreasing size_, forming a pyramid structure. These images are stored together, so that smaller textures are used when viewing at greater distances or angles, improving rendering efficiency and reducing texture distortion. For example, if we have a `8*8` texture, mipmapping technique will cut the texture into smaller ones, each time in half, the result is a `4*4` texture, and `2*2` and a `1*1`. When the object is close to us, the computer will choose the biggest texture(in this case, `8*8`), likewise, when the object is far away, the computer will use the smaller one. 
 - We can change the minification filter of texture with `minFilter` and `maxFilter`, the value can be `THREE.NearestFilter`, which is precise and gives a sharp feeling.
 - When setting `NearestFilter` as the minification filter, we don't need mipmaps. We can deactivate it with `texture.generateMipmaps = false`.
 
-3. **Considerations**:
+1. **Considerations**:
 
 - Weight: each pixel of texture will be stored in GPU regardless of the image's weight. GPU has storage limitations, so it's even worse because mipmapping increases the number of pixels. Try to reduce the size of image as much as possible.
 - Size: size (width and height) must be a power of 2.
@@ -292,6 +292,36 @@ fontLoader.load( 'fonts/helvetiker_regular.typeface.json', function ( font ) {
 
 #### Rate tracing
 ---
-- Shadows have always been a **challenge for real-time** 3D rendering (because you need shadows at a good frame rate), rate tracing (one technique) can take a long time to render, maybe hours to do one render, we can't afford to do that in real-time. Developers must find tricks to display realistic shadows at a reasonable frame rate. Three.js has a built-in solution. It's not perfect, but it's convenient.
-- Before you do one scene-render, Three.js will do a render for each light supporting shadows, these light renders will simulate what the light sees as if it was a camera. During these light renders, a ```MeshDepthMaterial``` replaces all mesh materials.
+- Shadows have always been a **challenge for real-time** 3D rendering (because you need shadows at a good frame rate), rate tracing (one technique) can take a long time to render, maybe hours to do one render, we can't afford to do that in real-time. Developers must find tricks to display realistic shadows at a reasonable frame rate. Three.js has a built-in solution -- **shadow maps**. It's not perfect, but it's convenient.
+- Before you do one scene-render, Three.js will do a pre-render for each _light-supporting shadows_(PointLight, Directional Light, SpotLight), these light renders will simulate what the light sees as if it was a camera. During these light renders, a ```MeshDepthMaterial``` replaces all mesh materials.
 - The light renders are stored as textures and we call them **shadow maps**. They are then used on every material supposed to receive shadows and projected on the geometry. [Demo](https://threejs.org/examples/webgl_shadowmap_viewer.html)
+
+#### Solution 1: Shadow maps
+---
+- **Shadow maps** are textures that contain the depth information of the scene as seen from the light. They are used to determine if a fragment is in shadow or not. The shadow map is a black and white texture, where black is the closest to the light and white is the farthest. The shadow map is then projected on the geometry to determine if a fragment is in shadow or not. 
+![alt](./images/shadow_map.png)
+- Steps: first, activate the shadow maps on the renderer by `renderer.shadowMap.enabled = true`. Then, gp through each object and decide if it can cast a shadow with `castShadow` and if it can receive shadow with `receiveShadow`. Finally, activate the shadows on the light.
+- We can access the shadow map in the `shadow` property of each light. By default, the shadow map is a 512x512 texture.
+- *Amplitude*: reduce to produce a better shadow quality. Since `directionalLight` has a orthographic camera, we can adjust the shadow camera's view size (viewing frustum 视锥体) to improve the shadow quality.
+```
+directionalLight.shadow.camera.top = 2
+directionalLight.shadow.camera.right = 2
+directionalLight.shadow.camera.bottom = - 2
+directionalLight.shadow.camera.left = - 2
+```
+#### Algorithms of shadow maps
+---
+Different algorithms of shadow maps:
+- THREE.BasicShadowMap: very performant, but lousy quality.
+- THREE.PCFShadowMap: less performant but smoother edges (default).
+- THREE.PCFSoftShadowMap: less performant but even softer edges.
+- THREE.VSMShadowMap: less performant, more constraints, can have unexpected results.
+
+- `PointLight`'s shadow camera is a perspective camera, because 3.js uses a cube texture to store the shadow map. which means 3.js will generate shadow maps in all 6 directions of the cube and finishes downward. That's why we get a downward shadow camera helper. Don't change the `fov` of the shadow camera, only change its `aspect` and `near` and `far` properties.
+
+#### Solution 2: Baking shadows
+---
+- **Shadow baking** is a computer graphics technique mainly used in **games** and **real-time rendering** applications. It **precomputes** the shadow interactions between **static objects** and **light sources** and stores the results in **texture maps**(usually made with softwares like blender). During real-time rendering, the **baked shadow maps** are used directly, eliminating the need to recalculate shadows and **improving performance**. Shadow baking is suitable for **static objects** and **light sources**, as their relationships are determined during the precomputation. For **dynamic objects** and **light sources**, **real-time shadow techniques**, such as **shadow maps**, are needed instead.
+
+#### Solution 3: Simulate shadows with another mesh
+---
