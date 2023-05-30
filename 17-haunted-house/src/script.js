@@ -12,13 +12,25 @@ const gui = new dat.GUI()
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
 
+// Fog
+const fog = new THREE.Fog('#262837', 1, 15)
+
 // Scene
 const scene = new THREE.Scene()
+scene.fog = fog
 
 /**
  * Textures
  */
 const textureLoader = new THREE.TextureLoader()
+
+const doorColorTexture = textureLoader.load('/textures/door/color.jpg')
+const doorAlphaTexture = textureLoader.load('/textures/door/alpha.jpg')
+const doorAmbientOcclusionTexture = textureLoader.load('/textures/door/ambientOcclusion.jpg')
+const doorHeightTexture = textureLoader.load('/textures/door/height.jpg')
+const doorNormalTexture = textureLoader.load('/textures/door/normal.jpg')
+const doorMetalnessTexture = textureLoader.load('/textures/door/metalness.jpg')
+const doorRoughnessTexture = textureLoader.load('/textures/door/roughness.jpg')
 
 /**
  * House
@@ -47,8 +59,14 @@ const doorPosition = {
 }
 const door = new THREE.Mesh(
     new THREE.PlaneGeometry(doorPosition.x, doorPosition.y),
-    new THREE.MeshStandardMaterial({ color: '#aa7b7b' })
+    new THREE.MeshStandardMaterial({
+        map: doorColorTexture,
+        transparent: true,
+        alphaMap: doorAlphaTexture,
+        aoMap: doorAmbientOcclusionTexture,
+    })
 )
+door.geometry.setAttribute('uv2', new THREE.Float32BufferAttribute(door.geometry.attributes.uv.array, 2))
 door.position.z = wallsPosition.z / 2 + 0.01 // 0.01 to avoid z-fighting
 door.position.y = doorPosition.y / 2
 house.add(door)
@@ -74,6 +92,28 @@ bush4.scale.set(0.15, 0.15, 0.15)
 bush4.position.set(- 1, 0.05, 2.6)
 
 house.add(bush1, bush2, bush3, bush4)
+
+// Graves
+const graves = new THREE.Group()
+scene.add(graves)
+
+const graveGeometry = new THREE.BoxGeometry(0.6, 0.8, 0.2)
+const graveMaterial = new THREE.MeshStandardMaterial({ color: '#b2b6b1' })
+
+for (let i = 0; i < 50; i++) {
+    const angle = Math.random() * Math.PI * 2 // random angle
+    const radius = 3 + Math.random() * 6 // random radius
+    const x = Math.sin(angle) * radius // x position
+    const z = Math.cos(angle) * radius // z position
+    const y = Math.random() * Math.PI // random rotation
+
+    const grave = new THREE.Mesh(graveGeometry, graveMaterial)
+    grave.position.set(x, 0.3, z)
+    grave.rotation.y = (Math.random() - 0.5) * 0.4
+    grave.rotation.z = (Math.random() - 0.5) * 0.4
+    // grave.castShadow = true
+    graves.add(grave)
+}
 
 // Roof
 // use a cone geometry to create a roof
@@ -103,18 +143,27 @@ scene.add(floor)
  * Lights
  */
 // Ambient light
-const ambientLight = new THREE.AmbientLight('#ffffff', 0.5)
-gui.add(ambientLight, 'intensity').min(0).max(1).step(0.001)
+const ambientLight = new THREE.AmbientLight('#b9d5ff', 0.12)
+gui.add(ambientLight, 'intensity').min(0).max(1).step(0.001).name('ambientLightIntensity')
 scene.add(ambientLight)
 
 // Directional light
-const moonLight = new THREE.DirectionalLight('#ffffff', 0.5)
+const moonLight = new THREE.DirectionalLight('#b9d5ff', 0.12)
 moonLight.position.set(4, 5, - 2)
-gui.add(moonLight, 'intensity').min(0).max(1).step(0.001)
-gui.add(moonLight.position, 'x').min(- 5).max(5).step(0.001)
-gui.add(moonLight.position, 'y').min(- 5).max(5).step(0.001)
-gui.add(moonLight.position, 'z').min(- 5).max(5).step(0.001)
+gui.add(moonLight, 'intensity').min(0).max(1).step(0.001).name('moonLightIntensity')
+gui.add(moonLight.position, 'x').min(- 5).max(5).step(0.001).name('moonLight x')
+gui.add(moonLight.position, 'y').min(- 5).max(5).step(0.001).name('moonLight y')
+gui.add(moonLight.position, 'z').min(- 5).max(5).step(0.001).name('moonLight z')
 scene.add(moonLight)
+
+// Door Light
+const doorLight = new THREE.PointLight('#ff7d46', 1, 7)
+doorLight.position.set(0, 2.2, 2.7)
+gui.add(doorLight, 'intensity').min(0).max(1).step(0.001).name('doorLightIntensity')
+gui.add(doorLight.position, 'x').min(- 5).max(5).step(0.001).name('doorLight x')
+gui.add(doorLight.position, 'y').min(- 5).max(5).step(0.001).name('doorLight y')
+gui.add(doorLight.position, 'z').min(- 5).max(5).step(0.001).name('doorLight z')
+house.add(doorLight)
 
 /**
  * Sizes
@@ -124,8 +173,7 @@ const sizes = {
     height: window.innerHeight
 }
 
-window.addEventListener('resize', () =>
-{
+window.addEventListener('resize', () => {
     // Update sizes
     sizes.width = window.innerWidth
     sizes.height = window.innerHeight
@@ -161,14 +209,15 @@ const renderer = new THREE.WebGLRenderer({
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+renderer.setClearColor('#262837')
+// scene.background = new THREE.Color('#262837')
 
 /**
  * Animate
  */
 const clock = new THREE.Clock()
 
-const tick = () =>
-{
+const tick = () => {
     const elapsedTime = clock.getElapsedTime()
 
     // Update controls
