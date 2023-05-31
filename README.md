@@ -345,4 +345,15 @@ In summary, use `renderer.setClearColor()` for a *single, universal background* 
 - **How does Three.js knows to use that UV2 set for my aoMap?**: 
   In Three.js, it is implicitly understood that if a second set of UV coordinates (`uv2`) exists in the geometry, it will be used for certain texture maps such as the Ambient Occlusion map (`aoMap`), the Bump Map (`bumpMap`), and the Displacement Map (`displacementMap`).
 
-  So when you create a material and set an `aoMap`, Three.js checks for the `uv2` attribute in the geometry. If it exists, it will use `uv2` for the `aoMap`. If not, the `aoMap` won't function properly because it doesn't have the necessary UV coordinates to map the texture onto the geometry.
+  So when you create a material and set an `aoMap`, Three.js checks for the `uv2` attribute in the geometry. If it exists, it will use `uv2` for the `aoMap`. If not, the `aoMap` won't function properly because it doesn't have the necessary UV coordinates to map the texture onto the geometry. In short, `uv2` is a required name for the second UV set.
+
+#### Repeat Wrapping
+- In Three.js, the `repeat` property of a texture is used to control the number of repetitions of the texture on the surface of a model. It takes two parameters representing the horizontal (U-axis) and vertical (V-axis) repetitions.
+
+ - `texture.repeat.set(8, 8)` sets the texture to repeat 8 times both horizontally and vertically.
+- The `wrapS` and `wrapT` properties are used to control how the texture wraps when the UV coordinates go beyond the defined range.
+
+ - `texture.wrapS = THREE.RepeatWrapping` sets the wrapping behavior for the horizontal direction.
+ - `texture.wrapT = THREE.RepeatWrapping` sets the wrapping behavior for the vertical direction.
+
+- Common wrap modes include `THREE.ClampToEdgeWrapping`, `THREE.RepeatWrapping`, and `THREE.MirroredRepeatWrapping`.
