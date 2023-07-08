@@ -325,3 +325,35 @@ Different algorithms of shadow maps:
 
 #### Solution 3: Simulate shadows with another mesh
 ---
+
+## 14. Haunted House Practice
+
+- How to set the set the background color: `renderer.setClearColor(0x000000)`.
+
+#### Difference between `renderer.setClearColor()` and `scene.background`
+
+- `renderer.setClearColor(color)`: Sets the clear color for the WebGL renderer, which is used to clear the canvas before each frame. This is a global setting affecting all scenes.
+- `scene.background = new THREE.Color(color)`: Sets the background color for a specific scene. If set, the renderer uses this color to clear the canvas when rendering this scene, allowing different scenes to have different backgrounds.
+
+In summary, use `renderer.setClearColor()` for a *single, universal background* color and `scene.background` for *different colors per scene*.
+
+#### Ambient occlusion
+- **Ambient Occlusion (AO)**: This is a way to make the shadows in 3D scenes look more realistic. It makes some parts darker—like corners and places where light can't reach easily.  It's often used in games, animation, and movie production.
+- **UV Mapping**: In 3D modeling, UV mapping is a technique that allows 2D textures to be painted onto a 3D model's surface. Think of it like wrapping a gift in decorative paper. "U" and "V" are coordinates on the 2D texture image, much like "X", "Y", and "Z" are coordinates in the 3D space. The term "mapping" refers to the process of assigning each point on the 3D model (vertices) to a corresponding point on the 2D texture image.
+- **UV Set**: In 3D modeling, a model can have multiple UV maps, and each of these maps is referred to as a UV set. Having multiple UV sets allows different textures to be applied to the model without them overlapping or conflicting with each other. For example, Sometimes, you want to wrap more than one type of paper (texture) around your 3D gift box (model). Each type of paper (texture) you use is called a UV set.
+- **Why AO maps often use a second UV set**: Your AO map (shadow map) is like a special kind of gift paper that only affects how shadows look. To avoid messing up your regular gift paper (main texture), you wrap this special paper (AO map) separately using another UV set. This way, you can change your shadows without messing up the color and details of your main texture.
+- **How does Three.js knows to use that UV2 set for my aoMap?**: 
+  In Three.js, it is implicitly understood that if a second set of UV coordinates (`uv2`) exists in the geometry, it will be used for certain texture maps such as the Ambient Occlusion map (`aoMap`), the Bump Map (`bumpMap`), and the Displacement Map (`displacementMap`).
+
+  So when you create a material and set an `aoMap`, Three.js checks for the `uv2` attribute in the geometry. If it exists, it will use `uv2` for the `aoMap`. If not, the `aoMap` won't function properly because it doesn't have the necessary UV coordinates to map the texture onto the geometry. In short, `uv2` is a required name for the second UV set.
+
+#### Repeat Wrapping
+- In Three.js, the `repeat` property of a texture is used to control the number of repetitions of the texture on the surface of a model. It takes two parameters representing the horizontal (U-axis) and vertical (V-axis) repetitions.
+
+ - `texture.repeat.set(8, 8)` sets the texture to repeat 8 times both horizontally and vertically.
+- The `wrapS` and `wrapT` properties are used to control how the texture wraps when the UV coordinates go beyond the defined range.
+
+ - `texture.wrapS = THREE.RepeatWrapping` sets the wrapping behavior for the horizontal direction.
+ - `texture.wrapT = THREE.RepeatWrapping` sets the wrapping behavior for the vertical direction.
+
+- Common wrap modes include `THREE.ClampToEdgeWrapping`, `THREE.RepeatWrapping`, and `THREE.MirroredRepeatWrapping`.
