@@ -380,3 +380,12 @@ for (let i = 0; i < count * 3; i++) {
 // that's why we typed count * 3, and the last parameter is 3
 particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
 ```
+
+- [Cool particle website](https://www.kenney.nl/assets/particle-pack)
+
+#### Problems and Fixes
+- **Problem**: The particles will have a square shape and their edges will block the view of other particles behind them.
+- **Solution 1**: Set the `THREE.PointsMaterial`'s `alphaTest` property to a value between 0 and 1. This will make the material discard any pixels with an alpha value below the specified threshold. This is a quick and easy way to get rid of the edges of the particles.
+- **Solution 2**: Set the `THREE.PointsMaterial`'s `depthTest` property to `false`. Three.js will no longer check the depth of the particles, and they will no longer block each other. However, deactivating the depth testing might create bugs if you have other objects in your scene or particles with different colors.
+- **Solution 3**: Set the `THREE.PointsMaterial`'s `depthWrite` property to `false`. The depth of what's being drawn is stored in what we call a depth buffer. Instead of not testing if particle is closer than what's in the depth buffer, we can tell WebGL not to write particles in the depth buffer with `depthWrite`.
+- **Solution 4**: Set the `THREE.PointsMaterial`'s `blending` property to `THREE.AdditiveBlending`. This will make the particles blend with the background color, which is black by default. This is a quick and easy way to get rid of the edges of the particles. However, the effect will impact the performances, like framerate drop.
