@@ -357,3 +357,26 @@ In summary, use `renderer.setClearColor()` for a *single, universal background* 
  - `texture.wrapT = THREE.RepeatWrapping` sets the wrapping behavior for the vertical direction.
 
 - Common wrap modes include `THREE.ClampToEdgeWrapping`, `THREE.RepeatWrapping`, and `THREE.MirroredRepeatWrapping`.
+
+## 14. Particles
+
+#### Understanding BufferGeometry
+- `position` attribute: the position of each vertex in the geometry. It is a `Float32Array` array of length `3 * number of vertices` (3 components per vertex). The first three values are the `x`, `y`, and `z` coordinates of the first vertex, the next three values are the `x`, `y`, and `z` coordinates of the second vertex, and so on.
+- So, if we want to randomly assign a position to each vertex, we can do this:
+```js
+// Geometry
+const particlesGeometry = new THREE.BufferGeometry()
+const count = 500
+
+const positions = new Float32Array(count * 3)
+
+// fill the positions array with random values, each vertex has 3 values (x, y, z)
+for (let i = 0; i < count * 3; i++) { 
+  // each index is a value of x, y, or z
+  positions[i] = (Math.random() - 0.5) * 10
+}
+
+// so here we can have 500 vertices, each vertex has 3 values (x, y, z)
+// that's why we typed count * 3, and the last parameter is 3
+particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+```
