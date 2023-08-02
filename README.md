@@ -389,3 +389,17 @@ particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 
 - **Solution 2**: Set the `THREE.PointsMaterial`'s `depthTest` property to `false`. Three.js will no longer check the depth of the particles, and they will no longer block each other. However, deactivating the depth testing might create bugs if you have other objects in your scene or particles with different colors.
 - **Solution 3**: Set the `THREE.PointsMaterial`'s `depthWrite` property to `false`. The depth of what's being drawn is stored in what we call a depth buffer. Instead of not testing if particle is closer than what's in the depth buffer, we can tell WebGL not to write particles in the depth buffer with `depthWrite`.
 - **Solution 4**: Set the `THREE.PointsMaterial`'s `blending` property to `THREE.AdditiveBlending`. This will make the particles blend with the background color, which is black by default. This is a quick and easy way to get rid of the edges of the particles. However, the effect will impact the performances, like framerate drop.
+
+## 15. Galaxy
+- use `dispose()` to destroy the geometry and material that we don't use anymore, to free up memory. Note, we cannot destroy a mesh.
+```js
+const generateGalaxy = () => {
+  // destroy old galaxy
+  if (points !== null) {
+      geometry.dispose()
+      material.dispose()
+      scene.remove(points)
+  }
+  // ...
+}
+```
