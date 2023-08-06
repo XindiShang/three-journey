@@ -412,4 +412,4 @@ In Three.js, `lerp` can be useful for achieving animation, transitions and any o
 
 - Basic Trigonometry
 - The angle is called `theta` (θ). The three sides are `opposite`, `adjacent`, and `hypotenuse`. A helpful mnemonic is called **SOH CAH TOA**, which means sin = opp / hyp, cos = adj / hyp, tan = opp / adj.
-- In 2D Decartes coordinate system, the `x` axis is the `adjacent` side, the `y` axis is the `opposite` side, and the `hypotenuse` is the distance from the origin to the point. So that means x is usually `cos` and y is usually `sin`.
+- In 2D Descartes coordinate system, the `x` axis is the `adjacent` side, the `y` axis is the `opposite` side, and the `hypotenuse` is the distance from the origin to the point. So that means x is usually `cos` and y is usually `sin`.
