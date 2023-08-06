@@ -403,3 +403,13 @@ const generateGalaxy = () => {
   // ...
 }
 ```
+
+- `lerp` means *linear interpolation*(线性插值). It can be useful when we want to find a value between a starting point and an end point based on a factor. The formula goes like this:
+```
+result = A + factor * (B - A)
+```
+In Three.js, `lerp` can be useful for achieving animation, transitions and any other smooth effects.
+
+- Basic Trigonometry
+- The angle is called `theta` (θ). The three sides are `opposite`, `adjacent`, and `hypotenuse`. A helpful mnemonic is called **SOH CAH TOA**, which means sin = opp / hyp, cos = adj / hyp, tan = opp / adj.
+- In 2D Decartes coordinate system, the `x` axis is the `adjacent` side, the `y` axis is the `opposite` side, and the `hypotenuse` is the distance from the origin to the point. So that means x is usually `cos` and y is usually `sin`.
