@@ -403,3 +403,9 @@ const generateGalaxy = () => {
   // ...
 }
 ```
+
+- `lerp` means *linear interpolation*(线性插值). It can be useful when we want to find a value between a starting point and an end point based on a factor. The formula goes like this:
+```
+result = A + factor * (B - A)
+```
+In Three.js, `lerp` can be useful for achieving animation, transitions and any other smooth effects.

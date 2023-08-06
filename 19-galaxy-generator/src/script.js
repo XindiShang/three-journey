@@ -71,7 +71,8 @@ function generateGalaxy() {
         const randomY = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : -1)
         const randomZ = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : -1)
 
-        // TODO: figure out why use Math.cos and Math.sin here
+        // In trigonometry, cosine is on the x-axis and sine is on the y-axis, and this is a 2D coordinate system
+        // In Three, because our galaxy is perpendicular to the y-axis, we only need to define x and z coordinates
         positions[i3] = Math.cos(branchAngle + spinAngle) * radius + randomX
         positions[i3 + 1] = 0 + randomY
         positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius + randomZ
@@ -80,8 +81,6 @@ function generateGalaxy() {
         const mixedColor = colorInside.clone()
         mixedColor.lerp(colorOutside, radius / parameters.radius)
 
-        // TODO: take notes about lerp
-
         colors[i3] = mixedColor.r
         colors[i3 + 1] = mixedColor.g
         colors[i3 + 2] = mixedColor.b
@@ -89,6 +88,8 @@ function generateGalaxy() {
     }
 
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
 
     material = new THREE.PointsMaterial({
         size: parameters.size,
