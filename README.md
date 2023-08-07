@@ -413,3 +413,15 @@ In Three.js, `lerp` can be useful for achieving animation, transitions and any o
 - Basic Trigonometry
 - The angle is called `theta` (θ). The three sides are `opposite`, `adjacent`, and `hypotenuse`. A helpful mnemonic is called **SOH CAH TOA**, which means sin = opp / hyp, cos = adj / hyp, tan = opp / adj.
 - In 2D Descartes coordinate system, the `x` axis is the `adjacent` side, the `y` axis is the `opposite` side, and the `hypotenuse` is the distance from the origin to the point. So that means x is usually `cos` and y is usually `sin`.
+
+## Raycaster
+- A raycaster is an object that can be used for detecting intersections between objects and rays.
+- Usage examples:
+  - detect if there is a wall in front of the player
+  - test if the laser gun hit something
+  - test if something is currently under the mouse to simulate mouse events
+  - show an alert message if the spaceship is heading towards an asteroid
+- use `raycaster.set(origin, direction)` to set the origin and direction of the raycaster. The two parameters are both `THREE.Vector3` objects.
+- use `rayDirection.normalize()` to normalize the direction vector. So that the length of the vector is 1.
+- use `raycaster.intersectObject(object)` to check if the raycaster intersects with the object. It returns an array of intersections. If the array is empty, it means there is no intersection. And use `raycaster.intersectObjects([objects])` to check if the raycaster intersects with any of the objects in the array.
+- use `rayCaster.setFromCamera(mouse, camera)` to set the origin and direction of the raycaster based on the mouse position. The first parameter is a `THREE.Vector2` object representing the mouse position. The second parameter is the camera object.
