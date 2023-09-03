@@ -414,7 +414,7 @@ In Three.js, `lerp` can be useful for achieving animation, transitions and any o
 - The angle is called `theta` (θ). The three sides are `opposite`, `adjacent`, and `hypotenuse`. A helpful mnemonic is called **SOH CAH TOA**, which means sin = opp / hyp, cos = adj / hyp, tan = opp / adj.
 - In 2D Descartes coordinate system, the `x` axis is the `adjacent` side, the `y` axis is the `opposite` side, and the `hypotenuse` is the distance from the origin to the point. So that means x is usually `cos` and y is usually `sin`.
 
-## Raycaster
+## 16. Raycaster
 - A raycaster is an object that can be used for detecting intersections between objects and rays.
 - Usage examples:
   - detect if there is a wall in front of the player
@@ -425,3 +425,60 @@ In Three.js, `lerp` can be useful for achieving animation, transitions and any o
 - use `rayDirection.normalize()` to normalize the direction vector. So that the length of the vector is 1.
 - use `raycaster.intersectObject(object)` to check if the raycaster intersects with the object. It returns an array of intersections. If the array is empty, it means there is no intersection. And use `raycaster.intersectObjects([objects])` to check if the raycaster intersects with any of the objects in the array.
 - use `rayCaster.setFromCamera(mouse, camera)` to set the origin and direction of the raycaster based on the mouse position. The first parameter is a `THREE.Vector2` object representing the mouse position. The second parameter is the camera object.
+
+## 17. Scroll-based Animation
+### magFilter in Three.js
+- `magFilter` is a property that specifies how a texture should be magnified.
+- It is not specific to `MeshToonMaterial`; it applies to all materials in Three.js that use textures.
+#### 1. Default Behavior
+- If not specified, the default `magFilter` in Three.js is set to `THREE.LinearFilter`.
+#### 2. Types of Filters
+- `THREE.LinearFilter`: Provides smooth **blending** between colors when a texture is magnified. Creates a gradient effect by **mixing adjacent colors**.
+- `THREE.NearestFilter`: Retains the original color blocks without blending when magnified.
+#### 3. Importance in MeshToonMaterial
+- `MeshToonMaterial` often benefits from `THREE.NearestFilter` to maintain **clear color boundaries**, giving it a cartoon-like appearance.
+
+### manipulate the parallax(视差)
+- Project 21's parallax effects are driven by two primary interactions:
+  - Vertical scrolling of the webpage.
+  - Mouse movement within the viewport.
+
+#### 1. Scroll-Based Parallax
+The camera's Y-axis position is influenced by the user's vertical scroll position on the webpage:
+```js
+let currentScroll = window.scrollY;
+
+window.addEventListener('scroll', () => {
+    currentScroll = window.scrollY;
+});
+
+// In the animation loop (tick function)
+// currentScroll / sizes.height is between 0 and 1, which is the size of one section (100vh)
+// Multiply by objectsDistance to get to the next section
+// so that camera is positioned correctly in the next section
+camera.position.y = - currentScroll / sizes.height * objectsDistance;
+```
+Here, `currentScroll` holds the Y-axis scroll value, and the camera's Y-axis position is modified based on this value. This manipulation makes the 3D objects appear to move up or down as the user scrolls, creating a vertical parallax effect. Note: the Y-axis value should be negative.
+
+#### 2. Mouse Movement-Based Parallax
+```js
+const cursor = {
+    x: 0,
+    y: 0
+};
+
+window.addEventListener('mousemove', (event) => {
+    // it's better to have a value between -0.5 and 0.5
+    // instead of 0 and 1
+    cursor.x = event.clientX / sizes.width - 0.5;
+    cursor.y = event.clientY / sizes.height - 0.5;
+});
+
+// In the animation loop (tick function)
+// these calculations are made to achieve a delay effect
+// instead of moving instantly to the target position
+const parallaxX = cursor.x * 0.5;
+const parallaxY = - cursor.y * 0.5;
+cameraGroup.position.x += (parallaxX - cameraGroup.position.x) * 5 * deltaTime;
+cameraGroup.position.y += (parallaxY - cameraGroup.position.y) * 5 * deltaTime;
+```
