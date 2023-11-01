@@ -487,3 +487,24 @@ cameraGroup.position.y += (parallaxY - cameraGroup.position.y) * 5 * deltaTime;
 ### 1. How to achieve physics in Three.js
 - The trick is to create two worlds, one for Three.js and one for a physics engine like *Cannon.js( or Ammo.js or Oimo.js)*. Then, we need to synchronize the two worlds by updating the position of the Three.js objects based on the position of the physics objects.
 - There are also some awesome 2D physics engines like *Matter.js*, *Box2D*, *Planck.js*, and *p2.js*. There are solutions trying to combine Three.js with physics library like *Physijs*.
+
+### 2. Things are a little bit different in Cannon.js world
+- Instead of meshes, a Cannon.js world have bodies.
+```js
+const sphereBody = new CANNON.Body({
+    mass: 1, // kg, 0 = static object; if one body is heavier than the other, it will push the other one
+    position: new CANNON.Vec3(0, 3, 0),
+    shape: sphereShape,
+})
+```
+- Update Physics(Cannon.js) world in the tick function by calling `world.step()`.
+- Physics world can only rotate by using `Quaternion`: `body.quaternion.setFromAxisAngle(axis, angle)`.
+
+### 3. Contact Materials
+- Create a `ContactMaterial`, which is the combination of two `Materials` and how they should collide. The first two params are the two materials, the third param is an object containing collision properties like `friction` (how much does it rub) and `restitution`(how much does it bounce). The default value for both is `0.3`. Then, add the `ContactMaterial` to the `world`.
+
+### 4. Forces
+- `body.applyForce(force, position)` applies a force from a specified point in space (not necessarily on the `Body`'s surface) like the wind, a small push on a domino or a strong force on an angry bird.
+- `body.applyImpulse(impulse, position)` is like `applyForce` but instead of adding to the force, it will add to the velocity.
+- `body.applyLocalForce(force, position)` is the same as `applyForce` but the coordinates are local to the `Body` (`0, 0, 0` would be the center of the `Body`).
+- `body.applyLocalImpulse(impulse, position)` is the same as `applyImpulse` but the coordinates are local to the `Body`.

@@ -4,12 +4,23 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'lil-gui'
 import CANNON from 'cannon'
 
-console.log(CANNON)
 
 /**
  * Debug
  */
 const gui = new dat.GUI()
+const debugObject = {}
+debugObject.createSphere = () => {
+    createSphere(
+        Math.random() * 0.5,
+        {
+            x: (Math.random() - 0.5) * 3,
+            y: 3,
+            z: (Math.random() - 0.5) * 3
+        }
+    )
+}
+gui.add(debugObject, 'createSphere')
 
 /**
  * Base
@@ -36,20 +47,39 @@ const environmentMapTexture = cubeTextureLoader.load([
 ])
 
 /**
- * Test sphere
+ * Physics
  */
-const sphere = new THREE.Mesh(
-    new THREE.SphereGeometry(0.5, 32, 32),
-    new THREE.MeshStandardMaterial({
-        metalness: 0.3,
-        roughness: 0.4,
-        envMap: environmentMapTexture,
-        envMapIntensity: 0.5
-    })
+// World
+const world = new CANNON.World()
+world.gravity.set(0, - 9.82, 0)
+
+// Materials
+const defaultMaterial = new CANNON.Material('default')
+const defaultContractMaterial = new CANNON.ContactMaterial(
+    defaultMaterial,
+    defaultMaterial,
+    {
+        friction: 0.1,
+        restitution: 0.7
+    }
 )
-sphere.castShadow = true
-sphere.position.y = 0.5
-scene.add(sphere)
+world.addContactMaterial(defaultContractMaterial)
+world.defaultContactMaterial = defaultContractMaterial
+
+// Add objects to Cannon.js world by adding a body
+// Body is an object that has a shape and a position
+
+// Floor
+const floorShape = new CANNON.Plane()
+const floorBody = new CANNON.Body()
+floorBody.mass = 0
+floorBody.addShape(floorShape)
+// floorBody.material = defaultMaterial
+// Unfortunately, we can only use quaternion for rotation in Cannon.js
+// The first param is axis, because the plane is rotated around the x axis, we use -1
+// The second param is the angle, we rotate it 90 degrees
+floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(- 1, 0, 0), Math.PI * 0.5)
+world.addBody(floorBody)
 
 /**
  * Floor
@@ -132,13 +162,64 @@ renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
 /**
+ * Utils
+ */
+const objectsToUpdate = []
+
+const createSphere = (radius, position) => {
+    // Three.js
+    const mesh = new THREE.Mesh(
+        new THREE.SphereGeometry(radius, 20, 20),
+        new THREE.MeshStandardMaterial({
+            metalness: 0.3,
+            roughness: 0.4,
+            envMap: environmentMapTexture,
+        })
+    )
+    mesh.castShadow = true
+    mesh.position.copy(position)
+    scene.add(mesh)
+
+    // Cannon.js
+    const shape = new CANNON.Sphere(radius)
+    const body = new CANNON.Body({
+        mass: 1,
+        position: new CANNON.Vec3(0, 3, 0),
+        shape,
+        material: defaultMaterial
+    })
+    body.position.copy(position)
+    world.addBody(body)
+
+    objectsToUpdate.push({
+        mesh,
+        body
+    })
+}
+
+createSphere(0.5, { x: 0, y: 3, z: 0 })
+
+/**
  * Animate
  */
 const clock = new THREE.Clock()
+let oldElapsedTime = 0
 
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
+    const deltaTime = elapsedTime - oldElapsedTime
+    oldElapsedTime = elapsedTime
+
+    // Update physics world
+    // sphereBody.applyForce(new CANNON.Vec3(- 0.5, 0, 0), sphereBody.position)
+
+    world.step(1 / 60, deltaTime, 3)
+
+    // Update objects
+    for (let object of objectsToUpdate) {
+        object.mesh.position.copy(object.body.position)
+    }
 
     // Update controls
     controls.update()
