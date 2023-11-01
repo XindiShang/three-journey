@@ -482,3 +482,8 @@ const parallaxY = - cursor.y * 0.5;
 cameraGroup.position.x += (parallaxX - cameraGroup.position.x) * 5 * deltaTime;
 cameraGroup.position.y += (parallaxY - cameraGroup.position.y) * 5 * deltaTime;
 ```
+
+## 18. Physics
+### 1. How to achieve physics in Three.js
+- The trick is to create two worlds, one for Three.js and one for a physics engine like *Cannon.js( or Ammo.js or Oimo.js)*. Then, we need to synchronize the two worlds by updating the position of the Three.js objects based on the position of the physics objects.
+- There are also some awesome 2D physics engines like *Matter.js*, *Box2D*, *Planck.js*, and *p2.js*. There are solutions trying to combine Three.js with physics library like *Physijs*.
