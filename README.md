@@ -487,6 +487,7 @@ cameraGroup.position.y += (parallaxY - cameraGroup.position.y) * 5 * deltaTime;
 ### 1. How to achieve physics in Three.js
 - The trick is to create two worlds, one for Three.js and one for a physics engine like *Cannon.js( or Ammo.js or Oimo.js)*. Then, we need to synchronize the two worlds by updating the position of the Three.js objects based on the position of the physics objects.
 - There are also some awesome 2D physics engines like *Matter.js*, *Box2D*, *Planck.js*, and *p2.js*. There are solutions trying to combine Three.js with physics library like *Physijs*.
+- `PhysiJs`: uses *Ammo.js* and web workers by default. And instead of creating the Three.js object and physics body separately, we create a `Physijs.Mesh` object that will automatically create a physics body for us.
 
 ### 2. Things are a little bit different in Cannon.js world
 - Instead of meshes, a Cannon.js world have bodies.
@@ -498,6 +499,7 @@ const sphereBody = new CANNON.Body({
 })
 ```
 - Update Physics(Cannon.js) world in the tick function by calling `world.step()`.
+- Update the mesh by copying the position of the Physics(Cannon.js) world body.
 - Physics world can only rotate by using `Quaternion`: `body.quaternion.setFromAxisAngle(axis, angle)`.
 
 ### 3. Contact Materials
@@ -508,3 +510,81 @@ const sphereBody = new CANNON.Body({
 - `body.applyImpulse(impulse, position)` is like `applyForce` but instead of adding to the force, it will add to the velocity.
 - `body.applyLocalForce(force, position)` is the same as `applyForce` but the coordinates are local to the `Body` (`0, 0, 0` would be the center of the `Body`).
 - `body.applyLocalImpulse(impulse, position)` is the same as `applyImpulse` but the coordinates are local to the `Body`.
+
+### 5. Boxes
+- In `Cannon.js`, the box is centered at the center of the cube, which means we need to provide the half extents of the box. So we divide the width, height and depth by 2
+- Make sure to update the position and the rotation of the mesh based on the position and the rotation of the body.
+```js
+  // Update objects
+  for (let object of objectsToUpdate) {
+      object.mesh.position.copy(object.body.position)
+      // also make sure the rotation is updated
+      object.mesh.quaternion.copy(object.body.quaternion)
+  }
+```
+
+### 6. Collision Tests
+- When testing the collisions between objects, a naive approach to test every `Body` against every other `Body`. This is bas for performances.
+- We call this step the **broadphase** and we can use a different broadphase for better performances.
+  - `NaiveBroadphase`: default, test every `Body` against every other `Body`.
+  - `GridBroadphase`: divides the world in a grid and test only the `Bodies` in the same cell.
+  - `SAPBroadphase`: (**S**weep **A**nd **P**rune) - test `Bodies` on arbitrary axes during multiple steps. It's even better than `GridBroadphase`.
+- To use a broadphase, we simply instantiate it in the `world.broadphase` property and use the same `world` as parameter.
+```js
+  world.broadphase = new CANNON.SAPBroadphase(world)
+```
+- Even if we use an optimized broadphase algorithm, all the `Bodies` are still tested against each other, even those that are not moving. 
+- When the `Body` speed gets really slow, the `Body` can fall asleep and won't be tested unless a sufficient force is applied. This is called **sleeping**. We can set the `allowSleep` property to `true` on the `World`.
+- You can also set the `sleepSpeedLimit` and `sleepTimeLimit` properties on the `World` to control when a `Body` should fall asleep.
+
+### 7. Events
+- We can listen to events on `Body` like `collide`, `sleep`, `wakeup`, etc.
+- Play sound when collide - two problems to solve:
+  - The sound has to be played from the start while the sound is still playing.
+  - When collision is not too strong, the sound should be played at a lower volume.
+  ```js
+  const playHitSound = (collideEvent) => { 
+    // if the collision is not too strong, we want to play the sound at a lower volume
+    const impactStrength = collideEvent.contact.getImpactVelocityAlongNormal()
+
+    if (impactStrength > 1.5) {
+        // when the sound is playing, we want to reset the time to 0,
+        // to achieve the effect of playing the sound again and again
+        hitSound.volume = Math.random() // add some randomness to the volume
+        hitSound.currentTime = 0 // reset the sound from the beginning
+        hitSound.play()
+    }
+  }
+  ```
+
+### 8. Constraints
+Constraints enable constraints between bodies. They can be used to simulate joints, motors, and other things that can be modeled as a constraint.
+- `HingeConstraint`: acts like a door hinge
+- `DistanceConstraint`: forces the bodies to keep a distance from each other
+- `LockConstraint`: merges the bodies like if they were one piece
+- `PointToPointConstraint`: glues the bodies to a specific point
+
+### 9. Demos
+- [Cannon.js Demos](https://schteppe.github.io/cannon.js/)
+
+### 10. Performance
+- The component of our computer doing the physics is the CPU
+- If the CPU is too busy, the framerate will drop. The solution is to use workers. A worker is a script that runs in the background and doesn't block the main thread. We can use a worker to run the physics simulation and send the results to the main thread. The main thread will then update the Three.js scene based on the results. Here is a [worker demo](https://schteppe.github.io/cannon.js/examples/worker.html).
+- A simple usage of worker:
+```js
+  // In the main thread
+  const worker = new Worker('worker.js')
+  worker.postMessage({ hello: 'world' })
+  worker.onmessage = (event) => {
+      console.log(event.data)
+  }
+```
+```js
+// In the worker
+self.onmessage = (event) => {
+    console.log(event.data)
+    self.postMessage({ foo: 'bar' })
+}
+```
+- The worker can't access the DOM, so we can't use `window` or `document` in the worker. We can use `self` instead.
+- **Cannon.es**: since Cannon.js hasn't been updated for a while, we can use Cannon.es, which is a fork of Cannon.js. It's a modern version of Cannon.js, which is written in ES6 and uses ES modules. It's also more optimized and has a better API. It's also compatible with Three.js.

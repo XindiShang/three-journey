@@ -2,7 +2,7 @@ import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'lil-gui'
-import CANNON from 'cannon'
+import * as CANNON from 'cannon-es'
 
 
 /**
@@ -20,7 +20,35 @@ debugObject.createSphere = () => {
         }
     )
 }
-gui.add(debugObject, 'createSphere')
+
+debugObject.createBox = () => {
+    createBox(
+        Math.random(),
+        Math.random(),
+        Math.random(),
+        {
+            x: (Math.random() - 0.5) * 3,
+            y: 3,
+            z: (Math.random() - 0.5) * 3
+        }
+    )
+}
+
+debugObject.reset = () => {
+    // remove all objects
+    for (let object of objectsToUpdate) {
+        // remove the event listener
+        object.body.removeEventListener('collide', playHitSound)
+        // remove the body from the world
+        world.remove(object.body)
+        // remove the mesh from the scene
+        scene.remove(object.mesh)
+    }
+
+}
+gui.add(debugObject, 'createSphere') // an object and a property
+gui.add(debugObject, 'createBox')
+gui.add(debugObject, 'reset')
 
 /**
  * Base
@@ -47,11 +75,33 @@ const environmentMapTexture = cubeTextureLoader.load([
 ])
 
 /**
+ * Sounds
+ */
+const hitSound = new Audio('/sounds/hit.mp3')
+
+const playHitSound = (collideEvent) => { 
+    // if the collision is not too strong, we want to play the sound at a lower volume
+    const impactStrength = collideEvent.contact.getImpactVelocityAlongNormal()
+
+    if (impactStrength > 1.5) {
+        // when the sound is playing, we want to reset the time to 0,
+        // to achieve the effect of playing the sound again and again
+        hitSound.volume = Math.random() // add some randomness to the volume
+        // scale the volume according to the impact strength
+        hitSound.volume = THREE.MathUtils.clamp(hitSound.volume, 0.1, 1)
+        hitSound.currentTime = 0 // reset the sound from the beginning
+        hitSound.play()
+    }
+}
+
+/**
  * Physics
  */
 // World
 const world = new CANNON.World()
 world.gravity.set(0, - 9.82, 0)
+world.broadphase = new CANNON.SAPBroadphase(world)
+world.allowSleep = true
 
 // Materials
 const defaultMaterial = new CANNON.Material('default')
@@ -165,18 +215,21 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
  * Utils
  */
 const objectsToUpdate = []
+const sphereGeometry = new THREE.SphereGeometry(1, 20, 20)
+const sphereMaterial = new THREE.MeshStandardMaterial({
+    metalness: 0.3,
+    roughness: 0.4,
+    envMap: environmentMapTexture,
+})
 
 const createSphere = (radius, position) => {
     // Three.js
     const mesh = new THREE.Mesh(
-        new THREE.SphereGeometry(radius, 20, 20),
-        new THREE.MeshStandardMaterial({
-            metalness: 0.3,
-            roughness: 0.4,
-            envMap: environmentMapTexture,
-        })
+        sphereGeometry,
+        sphereMaterial
     )
     mesh.castShadow = true
+    mesh.scale.set(radius, radius, radius)
     mesh.position.copy(position)
     scene.add(mesh)
 
@@ -189,15 +242,55 @@ const createSphere = (radius, position) => {
         material: defaultMaterial
     })
     body.position.copy(position)
+    body.addEventListener('collide', playHitSound)
     world.addBody(body)
 
+    // Save in objects to update
     objectsToUpdate.push({
         mesh,
         body
     })
 }
 
-createSphere(0.5, { x: 0, y: 3, z: 0 })
+const boxGeometry = new THREE.BoxGeometry(1, 1, 1)
+const boxMaterial = new THREE.MeshStandardMaterial({
+    metalness: 0.3,
+    roughness: 0.4,
+    envMap: environmentMapTexture,
+})
+
+const createBox = (width, height, depth, position) => {
+    // Three.js
+    const mesh = new THREE.Mesh(
+        boxGeometry,
+        boxMaterial
+    )
+    mesh.castShadow = true
+    mesh.scale.set(width, height, depth)
+    mesh.position.copy(position)
+    scene.add(mesh)
+
+    // Cannon.js
+    // In Cannon.js, the box is centered at the center of the cube,
+    // which means we need to provide the half extents of the box.
+    // So we divide the width, height and depth by 2
+    const shape = new CANNON.Box(new CANNON.Vec3(width * 0.5, height * 0.5, depth * 0.5))
+    const body = new CANNON.Body({
+        mass: 1,
+        position: new CANNON.Vec3(3, 3, 0),
+        shape,
+        material: defaultMaterial
+    })
+    body.position.copy(position)
+    body.addEventListener('collide', playHitSound)
+    world.addBody(body)
+
+    // Save in objects to update
+    objectsToUpdate.push({
+        mesh,
+        body
+    })
+}
 
 /**
  * Animate
@@ -219,6 +312,8 @@ const tick = () =>
     // Update objects
     for (let object of objectsToUpdate) {
         object.mesh.position.copy(object.body.position)
+        // also make sure the rotation is updated
+        object.mesh.quaternion.copy(object.body.quaternion)
     }
 
     // Update controls
