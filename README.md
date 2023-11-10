@@ -588,3 +588,13 @@ self.onmessage = (event) => {
 ```
 - The worker can't access the DOM, so we can't use `window` or `document` in the worker. We can use `self` instead.
 - **Cannon.es**: since Cannon.js hasn't been updated for a while, we can use Cannon.es, which is a fork of Cannon.js. It's a modern version of Cannon.js, which is written in ES6 and uses ES modules. It's also more optimized and has a better API. It's also compatible with Three.js.
+
+## 19. Importing Models
+### 1. GLTF
+- GLTF has become almost the standard format for 3D models.
+- When choosing formats, there are a lot of things to consider, like size, compatibility, features, decompression speed, etc. GLTF is a good choice because it's a small file format, it's open source, it's supported by all major 3D softwares, and it supports a lot of features.
+- GLTF has multiple files: `.gltf` and `.bin` and `.png` or `.jpg`. 
+  - The `.gltf` file is a JSON file that contains cameras, lights, scenes, materials, object transformations, but no geometries nor textures. etc. 
+  - The `.bin` file is a binary file that usually contains data like the geometry (vertices positions, UV coordinates, normals, colors, etc.). 
+  - The `.png` or `.jpg` files are the textures.
+We load the `.gltf` file, and it will load the other files automatically.
