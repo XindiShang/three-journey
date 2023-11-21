@@ -590,11 +590,84 @@ self.onmessage = (event) => {
 - **Cannon.es**: since Cannon.js hasn't been updated for a while, we can use Cannon.es, which is a fork of Cannon.js. It's a modern version of Cannon.js, which is written in ES6 and uses ES modules. It's also more optimized and has a better API. It's also compatible with Three.js.
 
 ## 19. Importing Models
-### 1. GLTF
-- GLTF has become almost the standard format for 3D models.
-- When choosing formats, there are a lot of things to consider, like size, compatibility, features, decompression speed, etc. GLTF is a good choice because it's a small file format, it's open source, it's supported by all major 3D softwares, and it supports a lot of features.
-- GLTF has multiple files: `.gltf` and `.bin` and `.png` or `.jpg`. 
+### 1. glTF
+- glTF has become almost the standard format for 3D models.
+- When choosing formats, there are a lot of things to consider, like size, compatibility, features, decompression speed, etc. glTF is a good choice because it's a small file format, it's open source, it's supported by all major 3D softwares, and it supports a lot of features.
+- glTF has multiple files: `.gltf` and `.bin` and `.png` or `.jpg`. 
   - The `.gltf` file is a JSON file that contains cameras, lights, scenes, materials, object transformations, but no geometries nor textures. etc. 
   - The `.bin` file is a binary file that usually contains data like the geometry (vertices positions, UV coordinates, normals, colors, etc.). 
   - The `.png` or `.jpg` files are the textures.
 We load the `.gltf` file, and it will load the other files automatically.
+
+### 2. glTF-Binary
+- Only one file
+- Contains all the data (geometry, textures, etc.)
+- Binary format, so it's smaller and faster to load
+- Usually lighter
+- Hard to alter its data
+
+### 3. glTF-Draco
+- Like the **glTF default** format, but the buffer data (typically the geometry) is compressed using the **Draco** algorithm.
+- Much Lighter
+- Not exclusive to glTF but they got popular at the same time and implementation went faster with glTF exporters.
+- Google developed the Draco algorithm and it's open source. It's under the Apache license.
+
+### 4. glTF-Embedded
+- One file like the **glTF-Binary** format
+- JSON (like the **glTF default** format with all the data embedded in the JSON file)
+- Heavier (Heaviest of all)
+
+### 5. Load glTF models in Three.js
+```js
+const gltfLoader = new GLTFLoader()
+gltfLoader.load(
+    '/models/Duck/glTF/Duck.gltf',
+    (gltf) => {
+    console.log(gltf)
+    scene.add(gltf.scene)
+    },
+    (progress) => {
+        console.log('progress');
+        console.log(progress)
+    },
+    (error) => {
+        console.log('error');
+        console.log(error)
+    }
+)
+```
+- `scene.add(obj)` will remove the object from its current parent and add it to the scene. In order to fix that, we have 2 solutions.
+  - use while loop:
+  ```js
+  while (gltf.scene.children.length) {
+      scene.add(gltf.scene.children[0])
+  }
+  ```
+  - or we can duplicate the `children` array of the gltf scene:
+  ```js
+  const children = [...gltf.scene.children]
+  for (const child of children) {
+      scene.add(child)
+  }
+  ```
+
+### 6. Load Draco models in Three.js
+- We need to use `DRACOLoader` to load the Draco compressed geometry in the background. Then use `setDecoderPath` to specify the path to the Draco decoder. Finally provide the `DRACOLoader` instance to the `GLTFLoader` instance with `setDRACOLoader`.
+```js
+const dracoLoader = new DRACOLoader()
+dracoLoader.setDecoderPath('/draco/')
+gltfLoader.setDRACOLoader(dracoLoader)
+// the rest of the code is the same as loading glTF models
+```
+- Draco compression is not a win-win situation. The geometries are lighter but the user has to load the `DRACOLoader` class and the decoder. So it's only worth it if the geometries are big enough.
+- It also takes time and resources for your computer to decode a compressed file. You'll have to adapt accordingly to the project.
+
+### 7. Animations
+- The loaded `gltf` contains an `animations` property composed of multiple `AnimationClip`. An `AnimationClip` is a `Three.js` class, it's basically a set of keyframe tracks. Each keyframe contains the time and the value of each property of the animated object.
+- We need to create an `AnimationMixer`
+- An `AnimationMixer` is like a media player associated with an object that can contain one or many `AnimationClips`. `AnimationMixer` is a `Three.js` class which accepts an object as parameter. This object is the object that will be animated. It can be a `Mesh`, a `Group`, a `Camera`, a `Light`, etc.
+- Add one of the `AnimationClips` to the mixer with the `clipAction(...)` method. This method returns an `AnimationAction`, and we can call the `play()` method on it.
+
+### 8. Three.js Editor
+- [Three.js Editor](https://threejs.org/editor/)
+- It's a good way to test models (only models of one file)
