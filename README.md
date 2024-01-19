@@ -671,3 +671,36 @@ gltfLoader.setDRACOLoader(dracoLoader)
 ### 8. Three.js Editor
 - [Three.js Editor](https://threejs.org/editor/)
 - It's a good way to test models (only models of one file)
+
+## 20. Blender
+### 1. Blender Basics
+- Area Manipulation: 
+  - Move the mouse to the edge of an area, wait for the "+" sign to appear, then click and drag to split (create) a new area.
+  - Hold the mouse on the edge of an area, wait for the "+" sign to appear, then click and drag to merge (delete) an area.
+- Axes: Z axis is the vertical axis, Y axis is the depth axis, X axis is the horizontal axis.
+- [Shortcuts](https://kapeli.com/cheat_sheets/Blender.docset/Contents/Resources/Documents/index):
+  - Shortcuts are area-specific. For example, the shortcut `A` is used to select all objects in the 3D Viewport, but it is used to add a new object in the Outliner.
+  - Orbit Rotate: Pressing the middle mouse
+  - Truck (Horizontal) & Pedestal (Vertical): Pressing Shift + the middle mouse
+  - Dolly (Zoom): Mouse wheel. If you hit the end of the zoom, you can press Ctrl + Shift + middle mouse and move the mouse to zoom in and out.
+  - Tilt & Pan: Switch to walk mode (fly mode) by pressing Shift + ~ (tilde key). Then use WASD to move around. Use the mouse to look around.
+  - Reset Viewport: Shift + C or Home
+  - Hide: H; Unhide: Alt + H
+  - Focus & Hide Everything Else: Press /
+  - Multiple Select: Shift + left click
+  - Select All: A; Unselect All: Double Click A
+  - Select Portion: B (box select); C (circle select)
+  - Create Object: Shift + A
+  - Mesh Properties Panel: F9
+  - Transform Object: G (grab/position); R (rotate); S (scale). G-Z: move along the Z axis. G-Shift+Z: move along the X and Y axis (exclude Z axis).
+  - Mode Switching: Ctrl + Tab
+  - Render: F12
+  - Search: F3 (I changed it to Ctrl + F because it conflicts with the Snipaste)
+- Shading: Give realistic look to the object. Press Z to switch:
+  - 1. Solid: Default & performant
+  - 2. Material: Like solid but with a preview of the material
+  - 3. Wireframe
+  - 4. Rendered: Low quality render (realistic but less performant)
+
+### 2. Hamburger Practice
+- Data-Normals-Auto Smooth: 30 deg: to make the object look smooth when the angle between two faces is less than 30 deg (to simulate cheese).
