@@ -704,3 +704,122 @@ gltfLoader.setDRACOLoader(dracoLoader)
 
 ### 2. Hamburger Practice
 - Data-Normals-Auto Smooth: 30 deg: to make the object look smooth when the angle between two faces is less than 30 deg (to simulate cheese).
+
+## 21. Realistic Render
+### 1. Physically Correct Lighting
+- Make sure Blender and Three.js have the same light effects.
+```js
+renderer.physicallyCorrectLights = true
+```
+- Use environment map to simulate light bouncing. (Cube texture loader)
+- Use scene.traverse() to traverse all the objects in the scene and apply the environment map to the model.
+```js
+// Apply the environment map to the scene
+scene.background = environmentMapTexture
+// Apply the environment map to the model
+scene.environment = environmentMapTexture
+
+const updateAllMaterials = () => {
+    scene.traverse((child) => {
+        if (child instanceof THREE.Mesh &&
+            child.material instanceof THREE.MeshStandardMaterial
+        ) {
+            // no need to add this line, just apply the environment map to the scene
+            // child.material.envMap = environmentMapTexture
+            child.material.envMapIntensity = debugObject.envMapIntensity
+        }
+    })
+}
+
+gltfLoader.load(
+    '/models/FlightHelmet/glTF/FlightHelmet.gltf',
+    (gltf) => {
+        gltf.scene.position.set(0, - 4, 0)
+        gltf.scene.scale.set(10, 10, 10)
+        gltf.scene.rotation.y = Math.PI * 0.5
+        scene.add(gltf.scene)
+
+        // have to update the gui after the model is loaded
+        gui.add(gltf.scene.rotation, 'y').min(- Math.PI).max(Math.PI).step(0.001).name('modelRotation')
+
+        updateAllMaterials()
+    },
+    (progress) => {
+    },
+    (error) => {
+    }
+)
+```
+
+### 2. Output Encoding
+- Meaning: how the color is stored in the texture. It can be linear or sRGB. The default value is `THREE.LinearEncoding`. We should use `THREE.sRGBEncoding`.
+```js
+renderer.outputEncoding = THREE.sRGBEncoding
+```
+- Gamma Encoding: a way to store colors while optimizing how bright and dark values are stored according to human eye sensitivity. Gamma usually controls the brightness. When we use `THREE.sRGBEncoding`, it's like using gamma encoding with a gamma value of 2.2.
+- Gamma Encoding example: it's easier for human eyes to distinguish between bright colors (0.1 - 0.5) than dark colors (0.5 - 1). So we can use gamma encoding to make the dark colors brighter and the bright colors darker. So that we can have a better contrast between the colors.
+- Make sure to apply output encoding to both the renderer and the environment map texture. Model textures through loaders are automatically encoded correctly.
+- We use sRGBEncoding for the environment map because it usually adopts a lot of colors, and our eyes cannot distinguish darker colors. We use LinearEncoding the the normal textures because we want the colors to be the exact colors as they are in the texture.
+
+### 3. Tone Mapping
+- The tone mapping intends to convert High Dynamic Range (HDR e.g. 0-1.5) values to Low Dynamic Range (LDR e.g. 0-1) values. It's a way to convert the colors of the scene to the colors of the screen.
+- Even though we don't use HDR textures, we can still use tone mapping to make the colors look better.
+```js
+renderer.toneMapping = THREE.ACESFilmicToneMapping
+renderer.toneMappingExposure = 3 // intensity
+```
+
+### 4. Anti-Aliasing (抗锯齿)
+- Aliasing an artifact: we can see stair-like effect on the edges of the objects. It's because the screen is made of pixels, and the pixels are square. So when we draw a diagonal line, it's not smooth.
+- One solution is to increase the resolution of the screen, so that one pixel can be smaller. But it's not a good solution because it's not performant. This is called **supersampling (SSAA)** or **full-scene (FSAA)**.
+- Another solution is to use **multisampling (MSAA)**. It's a technique that only samples the pixels on the edges of the objects. It's more performant than SSAA, but it's still not performant enough.
+- In Three.js, make sure to turn on `antialias` during the initialization of the renderer.
+```js
+const renderer = new THREE.WebGLRenderer({
+  canvas: canvas,
+  antialias: true
+})
+```
+- Screens with a pixel ratio above 1 don't need antialiasing. So we can use `window.devicePixelRatio` to check if the screen has a pixel ratio above 1. If it does, we can turn off antialiasing. The best way to activate antialias only for screens with a pixel ratio below 2.
+
+### 5. Shadows
+- Toggle the shadows on `WebGLRenderer` and change the shadow type to `PCFSoftShadowMap`. Then activate it on the light. Also make sure the object in the scene can cast shadow.
+```js
+renderer.shadowMap.enabled = true
+renderer.shadowMap.type = THREE.PCFSoftShadowMap
+
+directionalLight.castShadow = true
+
+const updateAllMaterials = () => {
+    scene.traverse((child) => {
+        if (child instanceof THREE.Mesh &&
+            child.material instanceof THREE.MeshStandardMaterial
+        ) {
+            // no need to add this line, just apply the environment map to the scene
+            // child.material.envMap = environmentMapTexture
+            child.material.envMapIntensity = debugObject.envMapIntensity
+            child.material.needsUpdate = true
+
+            // shadow
+            child.castShadow = true
+            child.receiveShadow = true
+        }
+    })
+}
+```
+- Check the shadow camera's size (near and far) by using camera helper. 
+```js
+const directionalLightCameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera)
+scene.add(directionalLightCameraHelper)
+```
+- We can also change the shadow map size to improve the quality of the shadows.
+```js
+directionalLight.shadow.mapSize.set(1024, 1024)
+```
+- Shadow Acne: In the burger example, because the burger also casts shadow on itself, so we can see abnormal shadows on the top bun. It's because when the light is generating the shadow, when it hits the burger before hitting the ground, it also generates shadow on the burger surface, so we need to push the shadow a little inside the burger. Then the shadow will be gone. We can solve this problem by using a bias or normalBias. 
+  - The `bias` helps flat surfaces.
+  - The `normalBias` helps curved surfaces.
+```js
+// Increase it until the shadow is barely visible
+directionalLight.shadow.normalBias = 0.001
+```
