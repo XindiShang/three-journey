@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import Experience from "./Experience";
 
 export default class Camera {
@@ -26,7 +27,7 @@ export default class Camera {
   }
 
   setOrbitControls() {
-    this.controls = new THREE.OrbitControls(
+    this.controls = new OrbitControls(
       this.instance,
       this.canvas
     );
