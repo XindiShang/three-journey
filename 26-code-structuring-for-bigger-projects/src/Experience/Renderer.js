@@ -35,6 +35,6 @@ export default class Renderer {
 
   resize() {
     this.instance.setSize(this.sizes.width, this.sizes.height)
-    this.instance.setPixelRatio(Math.min(this.sizes.devicePixelRatio, 2))
+    this.instance.setPixelRatio(this.sizes.devicePixelRatio)
   }
 }
