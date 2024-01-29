@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as THREE from 'three'
 import Experience from "../Experience";
 
@@ -6,6 +7,12 @@ export default class Environment {
     this.experience = new Experience();
     this.scene = this.experience.scene;
     this.resources = this.experience.resources;
+    this.debug = this.experience.debug;
+
+    // Debug
+    if (this.debug.active) {
+      this.debugFolder = this.debug?.gui?.addFolder("Environment");
+    }
 
     // Lights
     this.setSunlight();
@@ -21,6 +28,34 @@ export default class Environment {
     this.sunLight.position.set(3.5, 2, - 1.25)
 
     this.scene.add(this.sunLight);
+
+    // Debug
+    if (this.debug.active) {
+      this.debugFolder
+        .add(this.sunLight, 'intensity')
+        .name('lightIntensity')
+        .min(0)
+        .max(10)
+        .step(0.001)
+      this.debugFolder
+      .add(this.sunLight.position, 'x')
+      .name('lightX')
+      .min(- 5)
+      .max(5)
+      .step(0.001)
+      this.debugFolder
+      .add(this.sunLight.position, 'y')
+      .name('lightY')
+      .min(- 5)
+      .max(5)
+      .step(0.001)
+      this.debugFolder
+      .add(this.sunLight.position, 'z')
+      .name('lightZ')
+      .min(- 5)
+      .max(5)
+      .step(0.001)
+    }
   }
 
   setEnvironmentMap() {
@@ -43,5 +78,18 @@ export default class Environment {
     }
 
     this.environmentMap.updateMaterials();
+
+    // Debug
+    if (this.debug.active) {
+      this.debugFolder
+        .add(this.environmentMap, 'intensity')
+        .name('intensity')
+        .min(0)
+        .max(10)
+        .step(0.001)
+        .onChange(() => {
+        this.environmentMap.updateMaterials();
+      })
+    }
   }
 }

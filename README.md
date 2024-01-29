@@ -823,3 +823,33 @@ directionalLight.shadow.mapSize.set(1024, 1024)
 // Increase it until the shadow is barely visible
 directionalLight.shadow.normalBias = 0.001
 ```
+
+## 22. Code Structure
+### 1. How to structure the code
+```
+Experience/
+┣ Utils/
+┃ ┣ Debug.js
+┃ ┣ EventEmitter.js
+┃ ┣ Resources.js
+┃ ┣ Sizes.js
+┃ ┗ Time.js
+┣ World/
+┃ ┣ Environment.js
+┃ ┣ Floor.js
+┃ ┣ Fox.js
+┃ ┗ World.js -> meshes, environment, and lights
+┣ Camera.js
+┣ Experience.js -> main file, includes browser-related settings (resize, canvas, animation frame etc.) and three.js scene setup (camera, renderer, etc.)
+┣ Renderer.js
+┗ sources.js
+```
+### 2. Learn Bruno's Event Emitter
+### 3. Be sure to dispose unused objects
+- Test if it's a `Mesh`;
+- Call the `dispose()` function on the `geometry` property;
+- Loop through every key of the `material` property;
+- If there is a `dispose()` function available on that key, call it;
+- The `Camera` doesn't need to be disposed, but `OrbitControls` do;
+- Dispose the `Renderer`, `Debug UI`.
+##### The good practice is to create a `destroy` method for each class.

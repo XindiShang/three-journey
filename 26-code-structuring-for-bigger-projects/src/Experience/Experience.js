@@ -6,6 +6,7 @@ import Renderer from "./Renderer";
 import World from "./World/World";
 import Resources from "./Utils/Resources";
 import sources from "./sources";
+import Debug from "./Utils/Debug";
 
 let instance = null;
 
@@ -22,6 +23,7 @@ export default class Experience {
     this.canvas = canvas;
 
     // Setup
+    this.debug = new Debug(); // initiate first
     this.sizes = new Sizes();
     this.time = new Time();
     this.scene = new THREE.Scene();
@@ -55,5 +57,34 @@ export default class Experience {
 
   render() {
     this.renderer.render()
+  }
+
+  destroy() {
+    this.sizes?.off('resize');
+    this.time?.off('tick');
+
+    // Traverse the whole scene and dispose all objects
+    this.scene.traverse((child) => {
+      // Test if it's a mesh
+      if (child instanceof THREE.Mesh) {
+        // Dispose geometry
+        child.geometry.dispose();
+
+        // Loop through keys of material
+        for (const key in child.material) {
+          const value = child.material[key];
+
+          // Check if there's a dispose function
+          if (value && typeof value.dispose === 'function') {
+            value.dispose();
+          }
+        }
+
+        // Dispose others
+        this.camera?.controls?.dispose();
+        this.renderer?.instance?.dispose();
+        this.debug?.gui.destroy();
+      }
+    });
   }
 }
